@@ -20,7 +20,7 @@ triggers {
    stage('CheckOutCode'){
    steps{
        sendSlackNotifications("STARTED")
-       git branch: 'development', credentialsId: 'f6b15949-d2df-4a8e-935e-4938e4cad33e', url: 'https://github.com/sangeethabobbili/maven-web-application.git'
+       git branch: 'master', credentialsId: 'f6b15949-d2df-4a8e-935e-4938e4cad33e', url: 'https://github.com/sangeethabobbili/maven-web-application.git'
    }
    }
  
