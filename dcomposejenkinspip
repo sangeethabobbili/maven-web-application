@@ -1,0 +1,32 @@
+node{
+    
+    def bn=BUILD_NUMBER
+    stage('SCM checkout'){
+        git branch: 'master', credentialsId: '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', url: 'https://github.com/sangeethabobbili/maven-web-application.git'
+        
+    }
+    stage('maven clean package'){
+        def mavenHome= tool name: "Maven-3.9.1",type: "maven"
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+    stage('Build Docker Image'){
+        sh "docker build -t dockergeethaacc/maven-web-app:${bn} ."
+    }
+    stage('Push Docker Image'){
+        withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
+          sh "docker login -u dockergeethaacc -p ${dockerhubpwd}"
+        }
+        sh "docker push dockergeethaacc/maven-web-app:${bn}"
+     } 
+    stage('remove local images'){
+        sh "docker rmi -f dockergeethaacc/maven-web-app:${bn}"
+    }   
+    stage('Run Docker Image In Dev Server'){
+        
+     sshagent(['DOCKER_SERVER']) { 
+          //sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.34.130 docker rm –f javawebc || true'
+        //  sh "scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@172-31-3-116:/home/ubuntu/docker-compose.yml"
+          sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.15.166 sudo docker-compose up -d'
+     }
+    }
+}
