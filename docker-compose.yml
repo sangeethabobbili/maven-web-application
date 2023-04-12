@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   mavenapp:
-    image: 667021142019.dkr.ecr.ap-northeast-1.amazonaws.com/maven-web-application:VERSION
+    image: dockergeethaacc/maven-web-application:VERSION
     restart: always
     ports:
     - 8080:8080
