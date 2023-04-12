@@ -1,3 +1,19 @@
+docker-compose.yml
+=========================
+version: '3.1'
+services:
+  mavenapp:
+    image: dockergeethaacc/maven-web-app:14
+    restart: always
+    ports:
+    - 8080:8080
+    networks:
+      - mavenlocalbridge
+networks:
+  mavenlocalbridge:
+    driver: bridge
+
+====================================================
 node{
     
     def bn=BUILD_NUMBER
@@ -24,8 +40,9 @@ node{
     stage('Run Docker Image In Dev Server'){
         
      sshagent(['DOCKER_SERVER']) { 
-          //sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.34.130 docker rm –f javawebc || true'
-          sh "scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@172.31.15.166:/home/ubuntu/docker-compose.yml"
+          //sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.15.166 rm –f docker-compose.yml || true'
+        //  sh "scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@172.31.15.166:/home/ubuntu/docker-compose.yml"
+          sh "sed -i 's/VERSION/${bn}/' docker-compose.yml"
           sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.15.166 sudo docker-compose up -d'
      }
     }
