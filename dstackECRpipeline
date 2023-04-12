@@ -1,0 +1,47 @@
+docker-compose.yml
+------------------------------
+version: '3.1'
+services:
+  mavenapp:
+    image: 667021142019.dkr.ecr.ap-northeast-1.amazonaws.com/maven-web-application:VERSION
+    restart: always
+    ports:
+    - 8080:8080
+    networks:
+    - mavenappbridge
+networks:
+  mavenappbridge:
+
+-----------------------------
+   pipeline
+node{
+    
+    def bn=BUILD_NUMBER
+    stage('SCM checkout'){
+        git branch: 'master', credentialsId: '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', url: 'https://github.com/sangeethabobbili/maven-web-application.git'
+        
+    }
+    stage('maven clean package'){
+        def mavenHome= tool name: "Maven-3.9.1",type: "maven"
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+    stage('Build Docker Image'){
+        sh 'docker build -t 667021142019.dkr.ecr.ap-northeast-1.amazonaws.com/maven-web-application .'
+    }
+    stage('Push Docker Image'){
+        sh 'aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 667021142019.dkr.ecr.ap-northeast-1.amazonaws.com'
+        sh 'docker push 667021142019.dkr.ecr.ap-northeast-1.amazonaws.com/maven-web-application'
+     } 
+    stage('remove local images'){
+        sh "docker rmi -f dockergeethaacc/maven-web-app:${bn}"
+    }   
+    stage('Run Docker Image In Dev Server'){
+        
+     sshagent(['DOCKER_SERVER']) { 
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.15.166 aws ecr get-login-password --region ap-northeast-1 | docker login --username AWS --password-stdin 667021142019.dkr.ecr.ap-northeast-1.amazonaws.com'
+            sh "scp -o StrictHostKeyChecking=no docker-compose.yml ubuntu@172.31.15.166:/home/ubuntu/docker-compose.yml"
+            sh "sed -i 's/VERSION/latest/' docker-compose.yml"
+            sh 'ssh -o StrictHostKeyChecking=no ubuntu@172.31.15.166 sudo docker stack deploy --compose-file docker-compose.yml mavenstack'
+    }
+}
+}
