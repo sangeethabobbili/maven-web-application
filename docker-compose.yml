@@ -4,7 +4,7 @@ services:
     image: dockergeethaacc/maven-web-app:VERSION
     restart: always
     ports:
-    - 8080:8080
+    - 8007:8080
     networks:
     - mavenappbridge
 networks:
