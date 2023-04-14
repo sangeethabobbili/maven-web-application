@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   mavenservice:
-    image: dockergeethaacc/maven-web-application:VERSION
+    image: dockergeethaacc/maven-web-app:VERSION
     restart: always
     ports:
     - 8080:8080
