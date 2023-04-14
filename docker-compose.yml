@@ -1,11 +1,11 @@
-version: '3.3'
+version: '3.1'
 services:
-  flaskcal:
-    image: dockergeethaacc/flaskcalpipe:VERSION
+  springboot:
+    image: dockergeethaacc/maven-web-application:VERSION
+    restart: always
     ports:
-    - 3010:3000
+    - 8080:8080
     networks:
-    - flasknw
+    - mavenappbridge
 networks:
-  flasknw:
-    external: true
+  mavenappbridge:
