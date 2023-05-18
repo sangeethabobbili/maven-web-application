@@ -5,15 +5,20 @@ node{
         
     }
     stage('maven clean package'){
-        def mavenHome= tool name: "Maven-3.9.1",type: "maven"
+        def mavenHome= tool name: "Maven3.9.2",type: "maven"
         sh "${mavenHome}/bin/mvn clean package"
     }
     stage('Build Docker Image'){
         sh "docker build -t dockergeethaacc/maven-web-app ."
     }
-    stage('Push Docker Image'){
-        withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
-          sh "docker login -u dockergeethaacc -p ${dockerhubpwd}"
+    stage("Docker push"){
+        withCredentials([string(credentialsId: 'docker_hub_credentials', variable: 'docker_hub_credentials')]) {
+           sh "docker login -u dockergeethaacc -p ${docker_hub_credentials}"
         }
         sh "docker push dockergeethaacc/maven-web-app"
-     } 
+    }
+    stage("deploy in k8s cluster  "){
+        
+        sh "kubectl apply -f mavenwebappdeployment.yaml"
+    }
+}
