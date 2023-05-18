@@ -1,0 +1,19 @@
+node{
+    
+    stage('SCM checkout'){
+        git branch: 'master', credentialsId: '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', url: 'https://github.com/sangeethabobbili/maven-web-application.git'
+        
+    }
+    stage('maven clean package'){
+        def mavenHome= tool name: "Maven-3.9.1",type: "maven"
+        sh "${mavenHome}/bin/mvn clean package"
+    }
+    stage('Build Docker Image'){
+        sh "docker build -t dockergeethaacc/maven-web-app ."
+    }
+    stage('Push Docker Image'){
+        withCredentials([string(credentialsId: 'dockerhubpwd', variable: 'dockerhubpwd')]) {
+          sh "docker login -u dockergeethaacc -p ${dockerhubpwd}"
+        }
+        sh "docker push dockergeethaacc/maven-web-app"
+     } 
